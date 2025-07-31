@@ -16,7 +16,10 @@ fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnDat
     let locations = response.body;
     let markers = [];
     let loTotal = 0;
-    let loCount = 0;
+    let currentRoute = "all";
+    let currentPrice = "all";
+    let routeLine = null;
+    let routeControl = null;
     /*let markersGroup = L.markerClusterGroup({
     	spiderfyOnMaxZoom: true,
     	showCoverageOnHover: true,
@@ -41,11 +44,23 @@ fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnDat
         iconAnchor: [17, 44.5],
         popupAnchor: [0, -45]
     });
+    var r2sLarge = L.icon({
+        iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/r2s.svg',
+        iconSize: [44, 54.5],
+        iconAnchor: [22, 54.5],
+        popupAnchor: [0, -55]
+    });
     var r2sPlus = L.icon({
         iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/r2sPlus.svg',
         iconSize: [34, 44.5],
         iconAnchor: [17, 44.5],
         popupAnchor: [0, -45]
+    });
+    var r2sPlusLarge = L.icon({
+        iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/r2sPlus.svg',
+        iconSize: [44, 54.5],
+        iconAnchor: [22, 54.5],
+        popupAnchor: [0, -55]
     });
     var ss = L.icon({
         iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/newCs.svg',
@@ -55,13 +70,6 @@ fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnDat
     });
     var cb = L.icon({
         iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/cb.svg',
-        iconSize: [34, 44.5],
-        iconAnchor: [17, 44.5],
-        popupAnchor: [0, -45]
-    });
-    
-    var city = L.icon({
-        iconUrl: 'https://uploads-ssl.webflow.com/6472f1355908e6f00acadae4/64ef0a66717532eb4614e6f0_Red%20Locator.svg',
         iconSize: [34, 44.5],
         iconAnchor: [17, 44.5],
         popupAnchor: [0, -45]
@@ -97,14 +105,16 @@ fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnDat
       })
       products += "</ul>";
       var marker = L.marker([GPSLatitude, GPSLongitude], {
-      	icon: mapIcon,
+        icon: mapIcon,
         title: "Depot"
       }).bindPopup(`<h6 style="max-width: 15ch; text-wrap: balance;">${location.Title}</h6>
         Type: <strong>${site}</strong><br>
         Base Price: <sup>R</sup><strong>${location.price}</strong><br>
         <a target="_blank" href="http://maps.google.com/maps?ll=${GPSLatitude},${GPSLongitude}">Open in Google Maps</a><br><br>${products}`).addTo(map);
-    	marker.depotData = location;
-    	// marker.bindTooltip("my tooltip text").openTooltip();
+        marker.depotData = location;
+        marker.siteType = site;
+        marker.baseIcon = mapIcon;
+      // marker.bindTooltip("my tooltip text").openTooltip();
       loTotal ++;
       markers.push(marker);
     });
@@ -114,119 +124,125 @@ fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnDat
     total.innerText = loTotal;
     
     console.log(map);
+
+    applyFilters();
     
+    function applyFilters() {
+      let count = 0;
+      markers.forEach(function(marker) {
+        let depotData = marker.depotData;
+        let routeMatch = true;
+        if (currentRoute !== 'all') {
+          if (currentRoute === 'Cross_Border') {
+            routeMatch = !depotData.IsInSouthAfrica;
+          } else {
+            routeMatch = depotData[currentRoute] === 'True';
+          }
+        }
+
+        let priceMatch = true;
+        if (currentPrice !== 'all') {
+          priceMatch = marker.siteType === currentPrice;
+        }
+
+        let routeProxMatch = true;
+        if (routeLine) {
+          routeProxMatch = routeLine.getBounds().contains(marker.getLatLng());
+        }
+
+        if (routeMatch && priceMatch && routeProxMatch) {
+          if (routeLine && (marker.siteType === 'Refuel2Save' || marker.siteType === 'Refuel2Save+')) {
+            marker.setIcon(marker.siteType === 'Refuel2Save' ? r2sLarge : r2sPlusLarge);
+          } else {
+            marker.setIcon(marker.baseIcon);
+          }
+          marker.addTo(map);
+          count++;
+        } else {
+          marker.remove();
+        }
+      });
+      filterCount.innerText = count;
+    }
+
     var dropdown = document.getElementById('routeFilter');
     dropdown.addEventListener('change', function() {
-      var selectedRoute = this.value;
-      var loCount = 0;
-    
-      // Check if the selected option is "all"
-      if (selectedRoute === 'all') {
-        // Show all markers with staggered animation
-        markers.forEach(function(marker, index) {
-          marker.remove();
-          marker.addTo(map);
-          loCount++;
-        });
-      } else if (selectedRoute === 'Cross_Border') {
-        markers.forEach(function(marker, index) {
-          var depotData = marker.depotData;
-          var routeValue = !depotData.IsInSouthAfrica;
-          if (routeValue === true) {
-            marker.addTo(map);
-            loCount++;
-          } else {
-            // Hide marker
-            marker.remove();
-          }
-        });
-      } else {
-        // Loop through the markers and show/hide based on the selected route
-        markers.forEach(function(marker, index) {
-          var depotData = marker.depotData;
-          var routeValue = depotData[selectedRoute];
-          if (routeValue === "True") {
-            marker.addTo(map);
-            loCount++;
-          } else {
-            // Hide marker
-            marker.remove();
-          }
-        });
-      }
-      filterCount.innerText = loCount;
-      console.log(markers);
+      currentRoute = this.value;
+      applyFilters();
     });
-    
-    // minimal configure
-    new Autocomplete("search", {
-      selectFirst: true,
-      howManyCharacters: 2,
-      onSearch: ({ currentValue }) => {
-        const api = `https://nominatim.openstreetmap.org/search?format=geojson&limit=5&city=${encodeURI(
-          currentValue
-        )}`;
-    
-        return new Promise((resolve) => {
-          fetch(api)
-            .then((response) => response.json())
-            .then((data) => {
-              resolve(data.features);
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        });
-      },
-    
-      onResults: ({ currentValue, matches, template }) => {
-        const regex = new RegExp(currentValue, "gi");
-    
-        return matches === 0
-          ? template
-          : matches
-              .map((element) => {
-                return `
-              <li class="loupe">
-                <p>
-                  ${element.properties.display_name.replace(
-                    regex,
-                    (str) => `<b>${str}</b>`
-                  )}
-                </p>
-              </li> `;
-              })
-              .join("");
-      },
-    
-      onSubmit: ({ object }) => {
-        // remove all layers from the map
-        markers.forEach(function(marker) {
-          if (marker.title === "City") {
-            marker.removeFrom(map);
-          }
-        });
-        
-        const { display_name } = object.properties;
-        const [lng, lat] = object.geometry.coordinates;
-    
-        const marker = L.marker([lat, lng], {
-          icon: city,
-          title: "City",
-        });
-    
-        marker.addTo(map).bindPopup(display_name);
-        markers.push(marker);
-    
-        map.setView([lat, lng], 9);
-      },
-    
-      onSelectedItem: ({ index, element, object }) => {
-        console.log("onSelectedItem:", index, element, object);
-      },
-    
-      noResults: ({ currentValue, template }) =>
-        template(`<li>No results found: "${currentValue}"</li>`),
+
+    var priceDropdown = document.getElementById('priceFilter');
+    priceDropdown.addEventListener('change', function() {
+      currentPrice = this.value;
+      applyFilters();
+    });
+
+    const geoSearch = ({ currentValue }) => {
+      const api = `https://nominatim.openstreetmap.org/search?format=geojson&limit=5&q=${encodeURI(currentValue)}`;
+      return new Promise((resolve) => {
+        fetch(api)
+          .then((response) => response.json())
+          .then((data) => resolve(data.features))
+          .catch((error) => console.error(error));
+      });
+    };
+
+    ["routeStart", "routeEnd"].forEach(id => {
+      new Autocomplete(id, {
+        selectFirst: true,
+        howManyCharacters: 2,
+        onSearch: geoSearch,
+        onResults: ({ currentValue, matches, template }) => {
+          const regex = new RegExp(currentValue, "gi");
+          return matches === 0
+            ? template
+            : matches
+                .map((element) => `<li class=\"loupe\"><p>${element.properties.display_name.replace(regex, (str) => `<b>${str}</b>`)}</p></li>`)
+                .join("");
+        },
+        onSubmit: ({ object, feedback }) => {
+          feedback(object.properties.display_name);
+        }
+      });
+    });
+
+    async function geocode(place) {
+      const api = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURI(place)}`;
+      const res = await fetch(api);
+      const data = await res.json();
+      if (data && data[0]) {
+        return L.latLng(data[0].lat, data[0].lon);
+      }
+      return null;
+    }
+
+    document.getElementById('planRoute').addEventListener('click', async function() {
+      const startVal = document.getElementById('routeStart').value;
+      const endVal = document.getElementById('routeEnd').value;
+      if (!startVal || !endVal) return;
+      const start = await geocode(startVal);
+      const end = await geocode(endVal);
+      if (!start || !end) return;
+
+      if (routeControl) {
+        map.removeControl(routeControl);
+        routeControl = null;
+      }
+
+      routeControl = L.Routing.control({
+        waypoints: [start, end],
+        router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1' }),
+        show: false,
+        addWaypoints: false,
+        draggableWaypoints: false,
+        routeWhileDragging: false
+      }).addTo(map);
+
+      routeControl.on('routesfound', function(e) {
+        const coords = e.routes[0].coordinates;
+        routeLine = L.polyline(coords);
+        applyFilters();
+      });
     });
   })
   .catch(err => console.error(err));
