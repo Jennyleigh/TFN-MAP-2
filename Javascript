@@ -6,7 +6,10 @@ const options = {
   }
 };
 
-fetch('https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnData', options)
+const API_URL =
+  'https://6f6twe9e95.execute-api.eu-north-1.amazonaws.com/default/getTfnData';
+
+fetch(API_URL, options)
   .then(response => response.json())
   .then(response => {
     // API response contains depot info
