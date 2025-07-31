@@ -19,15 +19,15 @@ fetch(API_URL, options)
     let locations = response.body;
     let markers = [];
     let loTotal = 0;
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
+
     let currentRoute = "all";
     let currentPrice = "all";
-=======
+
     let loCount = 0;
     let currentRoute = "all";
     let currentPrice = "all";
     let searchQuery = "";
-// main
+
     let routeLine = null;
     let routeControl = null;
     /*let markersGroup = L.markerClusterGroup({
@@ -83,9 +83,7 @@ fetch(API_URL, options)
         iconAnchor: [17, 44.5],
         popupAnchor: [0, -45]
     });
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
 
-=======
     
     var city = L.icon({
         iconUrl: 'https://uploads-ssl.webflow.com/6472f1355908e6f00acadae4/64ef0a66717532eb4614e6f0_Red%20Locator.svg',
@@ -108,7 +106,7 @@ fetch(API_URL, options)
         popupAnchor: [0, -65]
     });
     
-// main
+
     // Iterate through the locations array and add markers to the map
     locations.forEach(location => {
       const GPSLatitude = location.GPSLatitude;
@@ -142,16 +140,16 @@ fetch(API_URL, options)
         Base Price: <sup>R</sup><strong>${location.price}</strong><br>
         <a target="_blank" href="http://maps.google.com/maps?ll=${GPSLatitude},${GPSLongitude}">Open in Google Maps</a><br><br>${products}`).addTo(map);
         marker.depotData = location;
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
+
         marker.siteType = site;
         marker.baseIcon = mapIcon;
       // marker.bindTooltip("my tooltip text").openTooltip();
-=======
-// 6e49mt-codex/add-filtering-and-routing-functionality-to-map
+
+
         marker.siteType = site;
         marker.baseIcon = mapIcon;
       // marker.bindTooltip("my tooltip text").openTooltip();
-=======
+
         marker.depotType = site;
         marker.originalIcon = mapIcon;
         if (site === "Refuel2Save") {
@@ -163,7 +161,7 @@ fetch(API_URL, options)
         }
         // marker.bindTooltip("my tooltip text").openTooltip();
 
-// main
+
       loTotal ++;
       markers.push(marker);
     });
@@ -175,13 +173,13 @@ fetch(API_URL, options)
     // Apply current filters initially
     applyFilters();
 
-=======
+
     
     console.log(map);
 
     applyFilters();
     
-// main
+
     function applyFilters() {
       let count = 0;
       markers.forEach(function(marker) {
@@ -200,21 +198,18 @@ fetch(API_URL, options)
           priceMatch = marker.siteType === currentPrice;
         }
 
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
-=======
         let nameMatch = depotData.Title.toLowerCase().includes(searchQuery);
 
-// main
         let routeProxMatch = true;
         if (routeLine) {
           routeProxMatch = routeLine.getBounds().contains(marker.getLatLng());
         }
 
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
+
         if (routeMatch && priceMatch && routeProxMatch) {
-=======
+
         if (routeMatch && priceMatch && nameMatch && routeProxMatch) {
-// main
+
           if (routeLine && (marker.siteType === 'Refuel2Save' || marker.siteType === 'Refuel2Save+')) {
             marker.setIcon(marker.siteType === 'Refuel2Save' ? r2sLarge : r2sPlusLarge);
           } else {
@@ -233,8 +228,7 @@ fetch(API_URL, options)
     dropdown.addEventListener('change', function() {
       currentRoute = this.value;
       applyFilters();
-// 21l6p1-codex/add-filtering-and-routing-functionality-to-map
-=======
+
     });
 
     var priceDropdown = document.getElementById('priceFilter');
@@ -263,7 +257,7 @@ fetch(API_URL, options)
         }
       });
       filterCount.innerText = loCount;
-// main
+
     });
 
     var priceDropdown = document.getElementById('priceFilter');
