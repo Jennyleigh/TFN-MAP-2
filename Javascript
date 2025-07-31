@@ -30,8 +30,8 @@ fetch(API_URL, options)
       animate: true,
       maxClusterRadius: 0
     });*/
-    
-    
+
+
     // Initialize the map
     const map = L.map('map', { dragging: !L.Browser.mobile, scrollWheelZoom: false }).setView([-25.146930436088034, 25.346189591867144], 5);
     map.addControl(new L.Control.Fullscreen());
@@ -39,7 +39,7 @@ fetch(API_URL, options)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    
+
     var r2s = L.icon({
         iconUrl: 'https://tfn.co.za/wp-content/uploads/2024/09/r2s.svg',
         iconSize: [34, 44.5],
@@ -76,7 +76,7 @@ fetch(API_URL, options)
         iconAnchor: [17, 44.5],
         popupAnchor: [0, -45]
     });
-    
+
     // Iterate through the locations array and add markers to the map
     locations.forEach(location => {
       const GPSLatitude = location.GPSLatitude;
@@ -116,13 +116,13 @@ fetch(API_URL, options)
       loTotal ++;
       markers.push(marker);
     });
-    
+
     //map.addLayer(markersGroup);
     filterCount.innerText = loTotal;
     total.innerText = loTotal;
     // Apply current filters initially
     applyFilters();
-    
+
     function applyFilters() {
       let count = 0;
       markers.forEach(function(marker) {
