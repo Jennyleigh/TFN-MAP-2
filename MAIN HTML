@@ -292,18 +292,16 @@
   position: relative;
 }
 .search-outer {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
+  position: relative;
+  margin-bottom: 10px;
   width: 50%;
   max-width: 500px;
   min-width: 300px;
+  z-index: 2;
 }
 @media screen and (max-width: 767px) {
 .search-outer {
-  left: 60px;
-  width: auto;
+  width: 100%;
   max-width: none;
   min-width: auto;
 }
@@ -390,16 +388,11 @@
   <div class="index-item"><img src="https://tfn.co.za/wp-content/uploads/2024/09/cb.svg" loading="lazy" alt="" class="pin-icon-ex">
     <div>Cross Border</div>
   </div>
-  <div class="index-item"><img src="https://uploads-ssl.webflow.com/6472f1355908e6f00acadae4/64ef0a66717532eb4614e6f0_Red%20Locator.svg" loading="lazy" alt="" class="pin-icon-ex">
-    <div>Search Marker</div>
-  </div>
 </div>
 <div class="truck-stops-block">
   <div class="div-block-7">
     <div class="search-outer w-embed">
       <div class="auto-search-wrapper">
-        <input type="text" autocomplete="on" id="search" class="full-width" placeholder="Enter the city name">
-        <input type="text" id="depotSearch" class="full-width" placeholder="Search depot">
         <input type="text" autocomplete="on" id="routeStart" class="full-width" placeholder="Route start">
         <input type="text" autocomplete="on" id="routeEnd" class="full-width" placeholder="Route end">
         <button type="button" id="planRoute" class="routes">Plan Route</button>
